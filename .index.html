@@ -1,0 +1,2305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Integer Operations Number Line Simulator</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#eef6ff;
+    color:#172033;
+}
+
+#integer-walker{
+    width:100%;
+    max-width:1100px;
+    margin:auto;
+    padding:clamp(10px,3vw,20px);
+}
+
+.title{
+    font-size:clamp(22px,4vw,34px);
+    font-weight:800;
+    text-align:center;
+    margin-bottom:6px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#475569;
+    font-size:15px;
+    margin-bottom:18px;
+    line-height:1.5;
+}
+
+.panel{
+    background:white;
+    border:1px solid #dbe4f0;
+    border-radius:18px;
+    padding:clamp(10px,2.5vw,18px);
+    margin-bottom:16px;
+    box-shadow:0 5px 18px rgba(15,23,42,.07);
+    width:100%;
+}
+
+.controls{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:12px;
+}
+
+label{
+    font-weight:700;
+    display:block;
+    margin-bottom:6px;
+    font-size:14px;
+}
+
+input,
+select,
+button{
+    font:inherit;
+    min-height:46px;
+    border-radius:10px;
+    padding:9px 12px;
+}
+
+input,
+select{
+    width:100%;
+    border:1px solid #cbd5e1;
+    background:white;
+    color:#172033;
+    font-size:17px;
+}
+
+button{
+    border:1px solid #cbd5e1;
+    background:#f8fafc;
+    font-weight:700;
+    cursor:pointer;
+    touch-action:manipulation;
+}
+
+button.primary{
+    background:#2563eb;
+    border-color:#2563eb;
+    color:white;
+}
+
+button:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+}
+
+.actions{
+    display:flex;
+    gap:9px;
+    flex-wrap:wrap;
+    margin-top:14px;
+}
+
+.actions button{
+    flex:1;
+    min-width:120px;
+}
+
+.equation{
+    text-align:center;
+    font-size:clamp(22px,5vw,36px);
+    font-weight:800;
+    margin:8px 0;
+    overflow-wrap:anywhere;
+}
+
+.message{
+    text-align:center;
+    background:#eff6ff;
+    border-radius:12px;
+    padding:12px;
+    font-size:16px;
+    line-height:1.5;
+    min-height:52px;
+}
+
+.direction{
+    text-align:center;
+    font-size:18px;
+    font-weight:800;
+    margin-top:10px;
+    min-height:28px;
+}
+
+.numberline-wrap{
+    overflow-x:auto;
+    border-radius:14px;
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    width:100%;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-x;
+}
+
+svg{
+    display:block;
+    width:100%;
+    min-width:650px;
+    height:auto;
+    min-height:190px;
+    max-height:280px;
+    user-select:none;
+}
+
+.legend{
+    display:flex;
+    justify-content:center;
+    gap:18px;
+    flex-wrap:wrap;
+    margin-top:12px;
+    font-size:14px;
+    color:#475569;
+}
+
+.legend span{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.key{
+    width:13px;
+    height:13px;
+    border-radius:50%;
+    display:inline-block;
+}
+
+.start{
+    background:#2563eb;
+}
+
+.finish{
+    background:#16a34a;
+}
+
+.walked{
+    background:#f97316;
+}
+
+.boybox{
+    text-align:center;
+    margin-top:12px;
+    font-weight:700;
+    color:#334155;
+    line-height:1.6;
+}
+
+/* TABLET */
+@media(max-width:800px){
+
+    .controls{
+        grid-template-columns:1fr 1fr;
+    }
+
+}
+
+/* MOBILE */
+@media(max-width:600px){
+
+    #integer-walker{
+        padding:8px;
+    }
+
+    .panel{
+        padding:10px;
+        margin-bottom:10px;
+        border-radius:14px;
+    }
+
+    .controls{
+        grid-template-columns:1fr;
+        gap:9px;
+    }
+
+    .actions{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:8px;
+    }
+
+    .actions button{
+        min-width:0;
+        width:100%;
+        font-size:14px;
+        padding:8px 6px;
+    }
+
+    .equation{
+        font-size:clamp(20px,7vw,30px);
+    }
+
+    .direction{
+        font-size:16px;
+    }
+
+    .legend{
+        gap:8px;
+        font-size:12px;
+    }
+
+    .boybox{
+        font-size:13px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="integer-walker">
+
+<div class="title">
+     Basic Operations with Integers on a Number Line
+</div>
+
+<div class="subtitle">
+   <h3 align="center"><b> 1) Assign 1st number &Observe the initial position.<br>2)Assign the sign(+/-) and observe the direction.<br>3) Assign 2st number &Observe the moving position &RESULT. </b></h3>
+</div>
+
+
+<!-- INPUT PANEL -->
+<div class="panel">
+
+    <div class="controls">
+
+        <div>
+            <label for="iw-first">
+                Starting Integer
+            </label>
+
+            <input
+                id="iw-first"
+                type="number"
+                min="-99"
+                max="99"
+                step="1"
+                value="2">
+        </div>
+
+
+        <div>
+            <label for="iw-op">
+                Operation
+            </label>
+
+            <select id="iw-op">
+
+                <option value="+">
+                    Addition +
+                </option>
+
+                <option value="-">
+                    Subtraction −
+                </option>
+
+            </select>
+        </div>
+
+
+        <div>
+            <label for="iw-second">
+                Second Integer
+            </label>
+
+            <input
+                id="iw-second"
+                type="number"
+                min="-99"
+                max="99"
+                step="1"
+                value="-5">
+        </div>
+
+    </div>
+
+
+    <div class="actions">
+
+        <button
+            id="iw-start"
+            class="primary"
+            type="button">
+            ▶ Start Walking
+        </button>
+
+        <button
+            id="iw-step"
+            type="button">
+            👣 One Step
+        </button>
+
+        <button
+            id="iw-pause"
+            type="button">
+            ⏸ Pause
+        </button>
+
+        <button
+            id="iw-reset"
+            type="button">
+            ↻ Reset
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- EQUATION / MESSAGE -->
+<div class="panel">
+
+    <div
+        id="iw-equation"
+        class="equation">
+        2 + (−5) = −3
+    </div>
+
+
+    <div
+        id="iw-message"
+        class="message"
+        aria-live="polite">
+
+        Press “Start Walking” to begin.
+
+    </div>
+
+
+    <div
+        id="iw-direction"
+        class="direction">
+
+        👦 Ready at +2
+
+    </div>
+
+</div>
+
+
+<!-- NUMBER LINE -->
+<div class="panel">
+
+    <div class="numberline-wrap">
+
+        <svg
+            id="iw-svg"
+            viewBox="0 0 900 250"
+            role="img"
+            aria-label="Integer number line with walking boy">
+        </svg>
+
+    </div>
+
+
+    <div class="legend">
+
+        <span>
+            <i class="key start"></i>
+            Starting Point
+        </span>
+
+        <span>
+            <i class="key walked"></i>
+            Boy's Path
+        </span>
+
+        <span>
+            <i class="key finish"></i>
+            Answer
+        </span>
+
+    </div>
+
+
+    <div class="boybox">
+
+        👦 Direction Rule:
+
+        <strong>+ → RIGHT</strong>
+        &nbsp;&nbsp;
+
+        <strong>− → LEFT</strong>
+        &nbsp;&nbsp;
+
+        <strong>0 → FRONT</strong>
+
+        <br>
+
+        <h3><b>by RAJAMOULI.BOMMERA,S.A (Maths)</b></h3>
+
+    </div>
+
+</div>
+
+</div>
+
+
+<script>
+
+(() => {
+
+"use strict";
+
+
+/* =====================================================
+   ELEMENTS
+===================================================== */
+
+const first =
+    document.getElementById("iw-first");
+
+const second =
+    document.getElementById("iw-second");
+
+const operation =
+    document.getElementById("iw-op");
+
+const svg =
+    document.getElementById("iw-svg");
+
+const equation =
+    document.getElementById("iw-equation");
+
+const message =
+    document.getElementById("iw-message");
+
+const direction =
+    document.getElementById("iw-direction");
+
+const startButton =
+    document.getElementById("iw-start");
+
+const stepButton =
+    document.getElementById("iw-step");
+
+const pauseButton =
+    document.getElementById("iw-pause");
+
+const resetButton =
+    document.getElementById("iw-reset");
+
+
+/* =====================================================
+   STATE
+===================================================== */
+
+let state = {
+
+    start: 2,
+
+    amount: -5,
+
+    movement: -5,
+
+    current: 2,
+
+    result: -3,
+
+    running: false,
+
+    paused: false,
+
+    timer: null,
+
+    step: 0
+
+};
+
+
+/* =====================================================
+   SVG SETTINGS
+===================================================== */
+
+const SVG_NS =
+    "http://www.w3.org/2000/svg";
+
+const LEFT = 55;
+
+const RIGHT = 845;
+
+const Y = 135;
+
+let rangeMin = -10;
+
+let rangeMax = 10;
+
+let stepPx = 1;
+
+
+/* =====================================================
+   NUMBER FUNCTIONS
+===================================================== */
+
+function clampNumber(value){
+
+    let n = Number(value);
+
+    if(!Number.isFinite(n)){
+        n = 0;
+    }
+
+    n = Math.trunc(n);
+
+    return Math.max(
+        -99,
+        Math.min(99,n)
+    );
+}
+
+
+function cleanNumber(n){
+
+    n = Number(n);
+
+    if(n < 0){
+
+        return "−" + Math.abs(n);
+
+    }
+
+    return String(n);
+}
+
+
+/* =====================================================
+   X POSITION
+===================================================== */
+
+function xPosition(number){
+
+    return LEFT +
+        (number - rangeMin) *
+        stepPx;
+
+}
+
+
+/* =====================================================
+   GET INPUT DATA
+===================================================== */
+
+function getData(){
+
+    const a =
+        clampNumber(first.value);
+
+    const b =
+        clampNumber(second.value);
+
+
+    /*
+       Addition:
+       a + b
+       movement = b
+
+       Subtraction:
+       a - b
+       movement = -b
+    */
+
+    let movement;
+
+    if(operation.value === "+"){
+
+        movement = b;
+
+    }
+    else{
+
+        movement = -b;
+
+    }
+
+
+    /*
+       FINAL ANSWER
+
+       This is the ONLY calculation
+       used by the simulator.
+    */
+
+    const result =
+        a + movement;
+
+
+    return {
+
+        start: a,
+
+        amount: b,
+
+        movement: movement,
+
+        result: result
+
+    };
+
+}
+
+
+/* =====================================================
+   CREATE SVG TEXT
+===================================================== */
+
+function createText(
+    parent,
+    textValue,
+    x,
+    y,
+    size,
+    weight = "600"
+){
+
+    const text =
+        document.createElementNS(
+            SVG_NS,
+            "text"
+        );
+
+    text.setAttribute(
+        "x",
+        x
+    );
+
+    text.setAttribute(
+        "y",
+        y
+    );
+
+    text.setAttribute(
+        "text-anchor",
+        "middle"
+    );
+
+    text.setAttribute(
+        "font-size",
+        size
+    );
+
+    text.setAttribute(
+        "font-weight",
+        weight
+    );
+
+    text.textContent =
+        textValue;
+
+    parent.appendChild(text);
+
+    return text;
+
+}
+
+
+/* =====================================================
+   DRAW / RESET
+===================================================== */
+
+function draw(){
+
+    clearTimeout(state.timer);
+
+
+    const data =
+        getData();
+
+
+    state = {
+
+        ...data,
+
+        current: data.start,
+
+        running: false,
+
+        paused: false,
+
+        timer: null,
+
+        step: 0
+
+    };
+
+
+    /*
+       IMPORTANT:
+       Equation always uses data.result.
+    */
+
+    equation.textContent =
+        `${cleanNumber(data.start)}
+         ${operation.value}
+         (${cleanNumber(data.amount)})
+         = ${cleanNumber(data.result)}`;
+
+
+    if(operation.value === "-"){
+
+        message.innerHTML =
+            `Subtraction changes to addition of the opposite:
+             <strong>
+             ${cleanNumber(data.start)}
+             −
+             (${cleanNumber(data.amount)})
+             =
+             ${cleanNumber(data.start)}
+             +
+             (${cleanNumber(data.movement)})
+             </strong>`;
+
+    }
+
+    else{
+
+        message.innerHTML =
+            `Start at
+             <strong>${cleanNumber(data.start)}</strong>.
+             The second integer is
+             <strong>${cleanNumber(data.amount)}</strong>.`;
+
+    }
+
+
+    direction.textContent =
+        `👦 Ready at ${cleanNumber(data.start)}`;
+
+
+    render();
+
+    updateButtons();
+
+}
+
+
+/* =====================================================
+   RENDER NUMBER LINE
+===================================================== */
+
+function render(){
+
+    const data = state;
+
+
+    while(svg.firstChild){
+
+        svg.removeChild(
+            svg.firstChild
+        );
+
+    }
+
+
+    /*
+       AUTOMATIC ZOOM
+
+       Only the relevant numbers are
+       displayed closely.
+
+       Minimum range = 10 units.
+       Maximum supported = -99 to +99.
+    */
+
+    const low =
+        Math.min(
+            data.start,
+            data.result,
+            0
+        );
+
+    const high =
+        Math.max(
+            data.start,
+            data.result,
+            0
+        );
+
+
+    const span =
+        Math.max(
+            10,
+            high - low + 6
+        );
+
+
+    const center =
+        (low + high) / 2;
+
+
+    rangeMin =
+        Math.floor(
+            center - span / 2
+        );
+
+
+    rangeMax =
+        Math.ceil(
+            center + span / 2
+        );
+
+
+    /*
+       Always include zero.
+    */
+
+    rangeMin =
+        Math.min(
+            rangeMin,
+            0
+        );
+
+    rangeMax =
+        Math.max(
+            rangeMax,
+            0
+        );
+
+
+    /*
+       Limit to -99 and +99.
+    */
+
+    rangeMin =
+        Math.max(
+            -99,
+            rangeMin
+        );
+
+    rangeMax =
+        Math.min(
+            99,
+            rangeMax
+        );
+
+
+    /*
+       Minimum visible range.
+    */
+
+    if(
+        rangeMax - rangeMin < 10
+    ){
+
+        rangeMin =
+            Math.max(
+                -99,
+                Math.floor(center - 5)
+            );
+
+        rangeMax =
+            Math.min(
+                99,
+                Math.ceil(center + 5)
+            );
+
+    }
+
+
+    /*
+       Wide-range situations.
+    */
+
+    if(
+        rangeMin === -99 &&
+        rangeMax < 99 &&
+        high >= 90
+    ){
+
+        rangeMax = 99;
+
+    }
+
+
+    if(
+        rangeMax === 99 &&
+        rangeMin > -99 &&
+        low <= -90
+    ){
+
+        rangeMin = -99;
+
+    }
+
+
+    stepPx =
+        (RIGHT - LEFT) /
+        (rangeMax - rangeMin);
+
+
+    /* =================================================
+       BACKGROUND
+    ================================================= */
+
+    const background =
+        document.createElementNS(
+            SVG_NS,
+            "rect"
+        );
+
+    background.setAttribute(
+        "x",
+        "0"
+    );
+
+    background.setAttribute(
+        "y",
+        "0"
+    );
+
+    background.setAttribute(
+        "width",
+        "900"
+    );
+
+    background.setAttribute(
+        "height",
+        "250"
+    );
+
+    background.setAttribute(
+        "fill",
+        "#f8fafc"
+    );
+
+    svg.appendChild(
+        background
+    );
+
+
+    /* =================================================
+       MAIN NUMBER LINE
+    ================================================= */
+
+    const line =
+        document.createElementNS(
+            SVG_NS,
+            "line"
+        );
+
+    line.setAttribute(
+        "x1",
+        LEFT
+    );
+
+    line.setAttribute(
+        "x2",
+        RIGHT
+    );
+
+    line.setAttribute(
+        "y1",
+        Y
+    );
+
+    line.setAttribute(
+        "y2",
+        Y
+    );
+
+    line.setAttribute(
+        "stroke",
+        "#334155"
+    );
+
+    line.setAttribute(
+        "stroke-width",
+        "4"
+    );
+
+    svg.appendChild(
+        line
+    );
+
+
+    /* =================================================
+       TICK INTERVAL
+    ================================================= */
+
+    const totalRange =
+        rangeMax - rangeMin;
+
+
+    let tickStep;
+
+
+    if(totalRange > 140){
+
+        tickStep = 20;
+
+    }
+    else if(totalRange > 70){
+
+        tickStep = 10;
+
+    }
+    else if(totalRange > 35){
+
+        tickStep = 5;
+
+    }
+    else{
+
+        tickStep = 1;
+
+    }
+
+
+    /* =================================================
+       NUMBER LINE TICKS
+    ================================================= */
+
+    const firstTick =
+        Math.ceil(
+            rangeMin / tickStep
+        ) * tickStep;
+
+
+    for(
+        let n = firstTick;
+        n <= rangeMax;
+        n += tickStep
+    ){
+
+        const tick =
+            document.createElementNS(
+                SVG_NS,
+                "line"
+            );
+
+        tick.setAttribute(
+            "x1",
+            xPosition(n)
+        );
+
+        tick.setAttribute(
+            "x2",
+            xPosition(n)
+        );
+
+        tick.setAttribute(
+            "y1",
+            Y - 10
+        );
+
+        tick.setAttribute(
+            "y2",
+            Y + 10
+        );
+
+        tick.setAttribute(
+            "stroke",
+            "#475569"
+        );
+
+        tick.setAttribute(
+            "stroke-width",
+            n === 0 ? "4" : "2"
+        );
+
+        svg.appendChild(
+            tick
+        );
+
+
+        createText(
+            svg,
+            n,
+            xPosition(n),
+            Y + 38,
+            totalRange > 70 ? 13 : 16,
+            n === 0 ? "800" : "600"
+        );
+
+    }
+
+
+    /* =================================================
+       BOY'S WALKING PATH
+    ================================================= */
+
+    if(data.step > 0){
+
+        for(
+            let i = 1;
+            i <= data.step;
+            i++
+        ){
+
+            const previous =
+                data.start +
+                (
+                    data.movement > 0
+                    ? i - 1
+                    : -(i - 1)
+                );
+
+
+            const position =
+                data.start +
+                (
+                    data.movement > 0
+                    ? i
+                    : -i
+                );
+
+
+            const path =
+                document.createElementNS(
+                    SVG_NS,
+                    "line"
+                );
+
+
+            path.setAttribute(
+                "x1",
+                xPosition(previous)
+            );
+
+            path.setAttribute(
+                "x2",
+                xPosition(position)
+            );
+
+            path.setAttribute(
+                "y1",
+                Y
+            );
+
+            path.setAttribute(
+                "y2",
+                Y
+            );
+
+            path.setAttribute(
+                "stroke",
+                "#f97316"
+            );
+
+            path.setAttribute(
+                "stroke-width",
+                "8"
+            );
+
+            path.setAttribute(
+                "stroke-linecap",
+                "round"
+            );
+
+            svg.appendChild(
+                path
+            );
+
+        }
+
+    }
+
+
+    /* =================================================
+       STARTING POINT
+    ================================================= */
+
+    const startCircle =
+        document.createElementNS(
+            SVG_NS,
+            "circle"
+        );
+
+    startCircle.setAttribute(
+        "cx",
+        xPosition(data.start)
+    );
+
+    startCircle.setAttribute(
+        "cy",
+        Y
+    );
+
+    startCircle.setAttribute(
+        "r",
+        "9"
+    );
+
+    startCircle.setAttribute(
+        "fill",
+        "#2563eb"
+    );
+
+    svg.appendChild(
+        startCircle
+    );
+
+
+    /* =================================================
+       ANSWER POINT
+    ================================================= */
+
+    if(
+        data.step >=
+        Math.abs(data.movement)
+    ){
+
+        const finishCircle =
+            document.createElementNS(
+                SVG_NS,
+                "circle"
+            );
+
+
+        finishCircle.setAttribute(
+            "cx",
+            xPosition(data.result)
+        );
+
+        finishCircle.setAttribute(
+            "cy",
+            Y
+        );
+
+        finishCircle.setAttribute(
+            "r",
+            "10"
+        );
+
+        finishCircle.setAttribute(
+            "fill",
+            "#16a34a"
+        );
+
+        svg.appendChild(
+            finishCircle
+        );
+
+
+        createText(
+            svg,
+            "ANSWER " +
+            cleanNumber(data.result),
+            xPosition(data.result),
+            Y - 70,
+            15,
+            "800"
+        );
+
+    }
+
+
+    /* =================================================
+       WALKING BOY
+    ================================================= */
+
+    let facing;
+
+    if(data.movement > 0){
+
+        facing = "right";
+
+    }
+    else if(data.movement < 0){
+
+        facing = "left";
+
+    }
+    else{
+
+        facing = "front";
+
+    }
+
+
+    drawBoy(
+        xPosition(data.current),
+        Y - 32,
+        facing
+    );
+
+}
+
+
+/* =====================================================
+   DRAW BOY
+===================================================== */
+
+function drawBoy(
+    centerX,
+    centerY,
+    facing
+){
+
+    const group =
+        document.createElementNS(
+            SVG_NS,
+            "g"
+        );
+
+
+    group.setAttribute(
+        "transform",
+        `translate(${centerX} ${centerY})`
+    );
+
+
+    group.setAttribute(
+        "aria-label",
+        "Walking boy"
+    );
+
+
+    const skin =
+        "#f2c7a5";
+
+    const shirt =
+        "#2563eb";
+
+    const pants =
+        "#334155";
+
+    const hairColor =
+        "#3f2a20";
+
+
+    /* HEAD */
+
+    const head =
+        document.createElementNS(
+            SVG_NS,
+            "circle"
+        );
+
+    head.setAttribute(
+        "cx",
+        "0"
+    );
+
+    head.setAttribute(
+        "cy",
+        "-28"
+    );
+
+    head.setAttribute(
+        "r",
+        "12"
+    );
+
+    head.setAttribute(
+        "fill",
+        skin
+    );
+
+    group.appendChild(head);
+
+
+    /* HAIR */
+
+    const hair =
+        document.createElementNS(
+            SVG_NS,
+            "path"
+        );
+
+    hair.setAttribute(
+        "d",
+        "M-12 -30 Q0 -48 12 -30 L10 -36 Q0 -49 -10 -36Z"
+    );
+
+    hair.setAttribute(
+        "fill",
+        hairColor
+    );
+
+    group.appendChild(hair);
+
+
+    /* BODY */
+
+    const body =
+        document.createElementNS(
+            SVG_NS,
+            "rect"
+        );
+
+    body.setAttribute(
+        "x",
+        "-9"
+    );
+
+    body.setAttribute(
+        "y",
+        "-16"
+    );
+
+    body.setAttribute(
+        "width",
+        "18"
+    );
+
+    body.setAttribute(
+        "height",
+        "25"
+    );
+
+    body.setAttribute(
+        "rx",
+        "6"
+    );
+
+    body.setAttribute(
+        "fill",
+        shirt
+    );
+
+    group.appendChild(body);
+
+
+    /* ARM 1 */
+
+    const arm1 =
+        document.createElementNS(
+            SVG_NS,
+            "line"
+        );
+
+    arm1.setAttribute(
+        "x1",
+        "-8"
+    );
+
+    arm1.setAttribute(
+        "y1",
+        "-10"
+    );
+
+    if(facing === "right"){
+
+        arm1.setAttribute(
+            "x2",
+            "13"
+        );
+
+    }
+    else if(facing === "left"){
+
+        arm1.setAttribute(
+            "x2",
+            "-13"
+        );
+
+    }
+    else{
+
+        arm1.setAttribute(
+            "x2",
+            "-12"
+        );
+
+    }
+
+    arm1.setAttribute(
+        "y2",
+        "2"
+    );
+
+    arm1.setAttribute(
+        "stroke",
+        skin
+    );
+
+    arm1.setAttribute(
+        "stroke-width",
+        "5"
+    );
+
+    arm1.setAttribute(
+        "stroke-linecap",
+        "round"
+    );
+
+    group.appendChild(arm1);
+
+
+    /* ARM 2 */
+
+    const arm2 =
+        document.createElementNS(
+            SVG_NS,
+            "line"
+        );
+
+    arm2.setAttribute(
+        "x1",
+        "8"
+    );
+
+    arm2.setAttribute(
+        "y1",
+        "-10"
+    );
+
+    if(facing === "right"){
+
+        arm2.setAttribute(
+            "x2",
+            "5"
+        );
+
+    }
+    else if(facing === "left"){
+
+        arm2.setAttribute(
+            "x2",
+            "-5"
+        );
+
+    }
+    else{
+
+        arm2.setAttribute(
+            "x2",
+            "12"
+        );
+
+    }
+
+    arm2.setAttribute(
+        "y2",
+        "3"
+    );
+
+    arm2.setAttribute(
+        "stroke",
+        skin
+    );
+
+    arm2.setAttribute(
+        "stroke-width",
+        "5"
+    );
+
+    arm2.setAttribute(
+        "stroke-linecap",
+        "round"
+    );
+
+    group.appendChild(arm2);
+
+
+    /* LEG 1 */
+
+    const leg1 =
+        document.createElementNS(
+            SVG_NS,
+            "line"
+        );
+
+    leg1.setAttribute(
+        "x1",
+        "-4"
+    );
+
+    leg1.setAttribute(
+        "y1",
+        "9"
+    );
+
+    if(facing === "right"){
+
+        leg1.setAttribute(
+            "x2",
+            "9"
+        );
+
+    }
+    else if(facing === "left"){
+
+        leg1.setAttribute(
+            "x2",
+            "-9"
+        );
+
+    }
+    else{
+
+        leg1.setAttribute(
+            "x2",
+            "-8"
+        );
+
+    }
+
+    leg1.setAttribute(
+        "y2",
+        "27"
+    );
+
+    leg1.setAttribute(
+        "stroke",
+        pants
+    );
+
+    leg1.setAttribute(
+        "stroke-width",
+        "6"
+    );
+
+    leg1.setAttribute(
+        "stroke-linecap",
+        "round"
+    );
+
+    group.appendChild(leg1);
+
+
+    /* LEG 2 */
+
+    const leg2 =
+        document.createElementNS(
+            SVG_NS,
+            "line"
+        );
+
+    leg2.setAttribute(
+        "x1",
+        "4"
+    );
+
+    leg2.setAttribute(
+        "y1",
+        "9"
+    );
+
+    if(facing === "right"){
+
+        leg2.setAttribute(
+            "x2",
+            "-8"
+        );
+
+    }
+    else if(facing === "left"){
+
+        leg2.setAttribute(
+            "x2",
+            "8"
+        );
+
+    }
+    else{
+
+        leg2.setAttribute(
+            "x2",
+            "8"
+        );
+
+    }
+
+    leg2.setAttribute(
+        "y2",
+        "27"
+    );
+
+    leg2.setAttribute(
+        "stroke",
+        pants
+    );
+
+    leg2.setAttribute(
+        "stroke-width",
+        "6"
+    );
+
+    leg2.setAttribute(
+        "stroke-linecap",
+        "round"
+    );
+
+    group.appendChild(leg2);
+
+
+    /* =================================================
+       FACE
+    ================================================= */
+
+    if(facing === "front"){
+
+        /* LEFT EYE */
+
+        const eye1 =
+            document.createElementNS(
+                SVG_NS,
+                "circle"
+            );
+
+        eye1.setAttribute(
+            "cx",
+            "-4"
+        );
+
+        eye1.setAttribute(
+            "cy",
+            "-29"
+        );
+
+        eye1.setAttribute(
+            "r",
+            "2"
+        );
+
+        eye1.setAttribute(
+            "fill",
+            "#172033"
+        );
+
+        group.appendChild(eye1);
+
+
+        /* RIGHT EYE */
+
+        const eye2 =
+            document.createElementNS(
+                SVG_NS,
+                "circle"
+            );
+
+        eye2.setAttribute(
+            "cx",
+            "4"
+        );
+
+        eye2.setAttribute(
+            "cy",
+            "-29"
+        );
+
+        eye2.setAttribute(
+            "r",
+            "2"
+        );
+
+        eye2.setAttribute(
+            "fill",
+            "#172033"
+        );
+
+        group.appendChild(eye2);
+
+
+        /* SMILE */
+
+        const smile =
+            document.createElementNS(
+                SVG_NS,
+                "path"
+            );
+
+        smile.setAttribute(
+            "d",
+            "M-4 -23 Q0 -20 4 -23"
+        );
+
+        smile.setAttribute(
+            "fill",
+            "none"
+        );
+
+        smile.setAttribute(
+            "stroke",
+            "#172033"
+        );
+
+        smile.setAttribute(
+            "stroke-width",
+            "1.5"
+        );
+
+        group.appendChild(smile);
+
+    }
+    else{
+
+        /*
+           NOSE INDICATES DIRECTION
+
+           Nose RIGHT = positive movement
+           Nose LEFT  = negative movement
+        */
+
+        const nose =
+            document.createElementNS(
+                SVG_NS,
+                "circle"
+            );
+
+        nose.setAttribute(
+            "cx",
+            facing === "right"
+                ? "10"
+                : "-10"
+        );
+
+        nose.setAttribute(
+            "cy",
+            "-27"
+        );
+
+        nose.setAttribute(
+            "r",
+            "2"
+        );
+
+        nose.setAttribute(
+            "fill",
+            "#172033"
+        );
+
+        group.appendChild(nose);
+
+    }
+
+
+    svg.appendChild(group);
+
+}
+
+
+/* =====================================================
+   BUTTON STATE
+===================================================== */
+
+function updateButtons(){
+
+    startButton.disabled =
+        state.running &&
+        !state.paused;
+
+
+    stepButton.disabled =
+        state.running;
+
+
+    pauseButton.disabled =
+        !state.running;
+
+}
+
+
+/* =====================================================
+   ONE STEP
+===================================================== */
+
+function oneStep(){
+
+    const total =
+        Math.abs(
+            state.movement
+        );
+
+
+    if(state.step >= total){
+
+        finish();
+
+        return;
+
+    }
+
+
+    const sign =
+        state.movement >= 0
+        ? 1
+        : -1;
+
+
+    state.current =
+        state.start +
+        sign *
+        (state.step + 1);
+
+
+    state.step++;
+
+
+    if(sign > 0){
+
+        direction.textContent =
+            `👦 Facing RIGHT →
+             — Step ${state.step} of ${total}`;
+
+    }
+    else{
+
+        direction.textContent =
+            `👦 Facing LEFT ←
+             — Step ${state.step} of ${total}`;
+
+    }
+
+
+    message.innerHTML =
+        `Move <strong>
+        1 step
+        ${sign > 0 ? "RIGHT" : "LEFT"}
+        </strong>
+        because the movement is
+        <strong>
+        ${sign > 0 ? "positive (+)" : "negative (−)"}
+        </strong>.`;
+
+
+    render();
+
+
+    if(state.step >= total){
+
+        finish();
+
+    }
+
+}
+
+
+/* =====================================================
+   FINISH
+===================================================== */
+
+function finish(){
+
+    state.running = false;
+
+    state.paused = false;
+
+    clearTimeout(
+        state.timer
+    );
+
+    state.timer = null;
+
+
+    /*
+       FINAL ANSWER
+
+       Recalculate from original
+       starting number and movement.
+    */
+
+    const exactAnswer =
+        state.start +
+        state.movement;
+
+
+    state.result =
+        exactAnswer;
+
+
+    state.current =
+        exactAnswer;
+
+
+    direction.textContent =
+        `🎉 Answer:
+         ${cleanNumber(exactAnswer)}
+         — the boy stopped here.`;
+
+
+    message.innerHTML =
+        `<strong>
+        ${cleanNumber(state.start)}
+        ${operation.value}
+        (${cleanNumber(state.amount)})
+        =
+        ${cleanNumber(exactAnswer)}
+        </strong>`;
+
+
+    equation.textContent =
+        `${cleanNumber(state.start)}
+         ${operation.value}
+         (${cleanNumber(state.amount)})
+         =
+         ${cleanNumber(exactAnswer)}`;
+
+
+    render();
+
+    updateButtons();
+
+}
+
+
+/* =====================================================
+   START WALKING
+===================================================== */
+
+function startWalking(){
+
+    clearTimeout(
+        state.timer
+    );
+
+
+    if(
+        state.step >=
+        Math.abs(state.movement)
+    ){
+
+        draw();
+
+    }
+
+
+    state.running = true;
+
+    state.paused = false;
+
+    updateButtons();
+
+
+    /*
+       POSITIVE
+    */
+
+    if(state.movement > 0){
+
+        direction.textContent =
+            "👦 Facing RIGHT → — waiting 2 seconds before walking.";
+
+    }
+
+
+    /*
+       NEGATIVE
+    */
+
+    else if(state.movement < 0){
+
+        direction.textContent =
+            "👦 Facing LEFT ← — waiting 2 seconds before walking.";
+
+    }
+
+
+    /*
+       ZERO
+    */
+
+    else{
+
+        direction.textContent =
+            "👦 Facing FRONT ↑ — 0 means no movement.";
+
+    }
+
+
+    /*
+       ZERO MOVEMENT
+    */
+
+    if(state.movement === 0){
+
+        message.innerHTML =
+            "<strong>0 means no movement.</strong> " +
+            "The boy faces FRONT.";
+
+        render();
+
+        finish();
+
+        return;
+
+    }
+
+
+    message.innerHTML =
+        "<strong>Direction selected.</strong> " +
+        "The boy will wait 2 seconds, " +
+        "then walk one step at a time.";
+
+
+    render();
+
+
+    /*
+       2 SECOND WAIT
+    */
+
+    state.timer =
+        setTimeout(
+            runWalking,
+            2000
+        );
+
+}
+
+
+/* =====================================================
+   WALKING LOOP
+===================================================== */
+
+function runWalking(){
+
+    if(
+        !state.running ||
+        state.paused
+    ){
+
+        return;
+
+    }
+
+
+    if(
+        state.step >=
+        Math.abs(state.movement)
+    ){
+
+        finish();
+
+        return;
+
+    }
+
+
+    oneStep();
+
+
+    /*
+       850 ms between steps
+    */
+
+    if(state.running){
+
+        state.timer =
+            setTimeout(
+                runWalking,
+                850
+            );
+
+    }
+
+}
+
+
+/* =====================================================
+   PAUSE
+===================================================== */
+
+function pauseWalking(){
+
+    state.paused = true;
+
+    state.running = true;
+
+
+    clearTimeout(
+        state.timer
+    );
+
+
+    direction.textContent =
+        "⏸ Paused — press Start Walking to continue.";
+
+
+    updateButtons();
+
+}
+
+
+/* =====================================================
+   EVENT LISTENERS
+===================================================== */
+
+startButton.addEventListener(
+    "click",
+    startWalking
+);
+
+
+stepButton.addEventListener(
+    "click",
+    () => {
+
+        if(!state.running){
+
+            oneStep();
+
+            updateButtons();
+
+        }
+
+    }
+);
+
+
+pauseButton.addEventListener(
+    "click",
+    pauseWalking
+);
+
+
+resetButton.addEventListener(
+    "click",
+    draw
+);
+
+
+/*
+   Update immediately when
+   the user changes input.
+*/
+
+[first,second,operation].forEach(
+    element => {
+
+        element.addEventListener(
+            "change",
+            draw
+        );
+
+
+        element.addEventListener(
+            "input",
+            () => {
+
+                if(
+                    element.type ===
+                    "number"
+                ){
+
+                    draw();
+
+                }
+
+            }
+        );
+
+    }
+);
+
+
+/* =====================================================
+   INITIAL DISPLAY
+===================================================== */
+
+draw();
+
+
+})();
+</script>
+
+</body>
+</html>
